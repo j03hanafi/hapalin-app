@@ -52,7 +52,7 @@ func main() {
 	)
 
 	// Kill signal channel to shut down
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
