@@ -1,4 +1,4 @@
-package domain
+package apperrors
 
 import (
 	"errors"
@@ -93,6 +93,14 @@ func NewInternal() *Error {
 	return &Error{
 		Type:    Internal,
 		Message: "Internal server error.",
+	}
+}
+
+// NewNotFound to create an error for 404
+func NewNotFound(name, value string) *Error {
+	return &Error{
+		Type:    NotFound,
+		Message: fmt.Sprintf("Resource: %v with value %v not found", name, value),
 	}
 }
 
