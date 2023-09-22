@@ -43,3 +43,4 @@ jobs:
         with:
           name: Go Test Results
           path: TestResults.json
+          working-directory: ./account
