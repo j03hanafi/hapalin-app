@@ -24,6 +24,7 @@ func TestMe(t *testing.T) {
 	l := logger.Get()
 
 	t.Run("Success", func(t *testing.T) {
+		t.Parallel()
 		uid, _ := uuid.NewRandom()
 
 		mockUserResp := &domain.User{
@@ -69,6 +70,7 @@ func TestMe(t *testing.T) {
 	})
 
 	t.Run("No user in context", func(t *testing.T) {
+		t.Parallel()
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
 			On("Get", mock.Anything, mock.Anything).
@@ -96,6 +98,7 @@ func TestMe(t *testing.T) {
 	})
 
 	t.Run("User not found", func(t *testing.T) {
+		t.Parallel()
 		uid, _ := uuid.NewRandom()
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
