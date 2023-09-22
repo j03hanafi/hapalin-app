@@ -42,5 +42,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Go Test Results
-          path: TestResults.json
-          working-directory: ./account
+          path: account/TestResults.json
