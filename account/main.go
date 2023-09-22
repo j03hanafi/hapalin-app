@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/j03hanafi/hapalin-app/handler"
+	"github.com/j03hanafi/hapalin-app/logger"
 	"go.uber.org/zap"
 	"net/http"
 	"os"
@@ -16,7 +18,7 @@ import (
 
 func main() {
 	// Setup zap logger
-	l := Get()
+	l := logger.Get()
 	defer func(l *zap.Logger) {
 		_ = l.Sync()
 	}(l)
@@ -28,10 +30,8 @@ func main() {
 	router.Use(ginzap.Ginzap(l, time.RFC3339, false))
 	router.Use(ginzap.RecoveryWithZap(l, true))
 
-	router.GET("/api/account", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"version": "v1.0.0",
-		})
+	handler.NewHandler(&handler.Config{
+		R: router,
 	})
 
 	server := &http.Server{
