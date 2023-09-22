@@ -32,10 +32,11 @@ jobs:
         run: go build -v .
 
       - name: Test
+        working-directory: ./account
         run: |
-          go test -v -race -covermode=atomic -coverprofile cover.out ./account
+          go test -v -race -covermode=atomic -coverprofile cover.out ./...
           echo "go tool cover -func cover.out"
-          go test -v -json -race ./account > TestResults.json
+          go test -v -json -race ./... > TestResults.json
 
       - name: Upload Go Test Results
         uses: actions/upload-artifact@v3
