@@ -1,0 +1,44 @@
+name: Account API
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Linting
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54
+          args: --timeout=3m
+
+      - name: Install Dependencies
+        working-directory: ./account
+        run: go mod download
+
+      - name: Build
+        working-directory: ./account
+        run: go build -v .
+
+      - name: Test
+        working-directory: ./account
+        run: |
+          go test -v -race -covermode=atomic -coverprofile cover.out .
+          echo "go tool cover -func cover.out"
+          go test -v -json -race . > TestResults.json
+
+      - name: Upload Go Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Go Test Results
+          path: TestResults.json

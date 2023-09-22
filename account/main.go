@@ -4,31 +4,34 @@ import (
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/j03hanafi/hapalin-app/handler"
+	"github.com/j03hanafi/hapalin-app/logger"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	ginzap "github.com/gin-contrib/zap"
 )
 
 func main() {
 	// Setup zap logger
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		log.Fatalf("Failed to initialize logger: %v", err)
-	}
-	defer logger.Sync()
+	l := logger.Get()
+	defer func(l *zap.Logger) {
+		_ = l.Sync()
+	}(l)
 
-	logger.Info("Server is starting...")
+	l.Info("Server is starting...")
 
-	router := gin.Default()
+	router := gin.New()
 
-	router.GET("/api/account", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"hello": "public!",
-		})
+	router.Use(ginzap.Ginzap(l, time.RFC3339, false))
+	router.Use(ginzap.RecoveryWithZap(l, true))
+
+	handler.NewHandler(&handler.Config{
+		R: router,
 	})
 
 	server := &http.Server{
@@ -38,13 +41,13 @@ func main() {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Fatal("Failed to initialize server: ",
+			l.Fatal("Failed to initialize server: ",
 				zap.Error(err),
 			)
 		}
 	}()
 
-	logger.Info("Starting server",
+	l.Info("Starting server",
 		zap.String("address", server.Addr),
 	)
 
@@ -61,9 +64,9 @@ func main() {
 	defer cancel()
 
 	// Shut down server
-	logger.Info("Server is shutting down...")
+	l.Info("Server is shutting down...")
 	if err := server.Shutdown(ctx); err != nil {
-		logger.Fatal("Server forced to shut down",
+		l.Fatal("Server forced to shut down",
 			zap.Error(err),
 		)
 	}

@@ -22,3 +22,10 @@ go.work
 
 # Jetbrains IDE
 .idea/
+
+# Log files
+*.log
+
+# Env files
+.env.*
+.env

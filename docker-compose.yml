@@ -26,9 +26,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.account.rule=Host(`hapalin.test`) && PathPrefix(`/api/account`)"
-    environment:
-      - ENV=dev
+    env_file:
+      - .env.dev
     volumes:
       - ./account:/go/src/app
     # have to use $$ (double-dollar) so docker doesn't try to substitute a variable
-    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+    command: reflex -v -r "\.go$$" -s -- sh -c "go run ./"
