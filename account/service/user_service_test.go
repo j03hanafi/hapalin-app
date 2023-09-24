@@ -16,6 +16,8 @@ func TestGet(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
 		uid, _ := uuid.NewRandom()
 
 		mockResp := &domain.User{
@@ -42,6 +44,8 @@ func TestGet(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
+		t.Parallel()
+
 		uid, _ := uuid.NewRandom()
 
 		mockUserRepository := new(mocks.MockUserRepository)

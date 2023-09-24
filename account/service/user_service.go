@@ -33,3 +33,9 @@ func (s UserService) Get(ctx context.Context, uid uuid.UUID) (*domain.User, erro
 
 	return u, err
 }
+
+// SignUp reaches a UserRepository to verify the
+// email address is available and signs up the user if this is the case
+func (s UserService) SignUp(ctx context.Context, u *domain.User) error {
+	panic("implement me")
+}
