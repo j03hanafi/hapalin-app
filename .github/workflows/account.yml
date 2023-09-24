@@ -19,7 +19,7 @@ jobs:
       - name: Linting
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.54
+          version: "latest"
           working-directory: ./account
           args: --timeout=3m
 
