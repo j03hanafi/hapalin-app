@@ -1,4 +1,4 @@
-module github.com/j03hanafi/hapalin-app
+module github.com/j03hanafi/hapalin-app/account
 
 go 1.21.1
 

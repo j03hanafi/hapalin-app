@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/j03hanafi/hapalin-app/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain"
 	"github.com/stretchr/testify/mock"
 )
 

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/j03hanafi/hapalin-app/domain"
-	"github.com/j03hanafi/hapalin-app/domain/apperrors"
-	"github.com/j03hanafi/hapalin-app/logger"
+	"github.com/j03hanafi/hapalin-app/account/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
+	"github.com/j03hanafi/hapalin-app/account/logger"
 	"go.uber.org/zap"
 	"net/http"
 )

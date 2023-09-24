@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/j03hanafi/hapalin-app/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain"
 	"net/http"
 	"os"
 )

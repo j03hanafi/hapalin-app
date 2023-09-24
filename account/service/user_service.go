@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/j03hanafi/hapalin-app/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain"
 )
 
 // UserService acts as a struct for injecting an implementation of UserRepository
