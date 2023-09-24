@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/j03hanafi/hapalin-app/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain"
 	"net/http"
 	"os"
 )
@@ -31,20 +31,13 @@ func NewHandler(c *Config) {
 	g := c.R.Group(os.Getenv("ACCOUNT_API_URL"))
 
 	g.GET("/me", h.Me)
-	g.GET("/signup", h.SignUp)
+	g.POST("/signup", h.SignUp)
 	g.GET("/signin", h.SignIn)
 	g.GET("/signout", h.SignOut)
 	g.GET("/tokens", h.Tokens)
 	g.GET("/image", h.Image)
 	g.GET("/deleteimage", h.DeleteImage)
 	g.GET("/details", h.Details)
-}
-
-// SignUp handler
-func (h Handler) SignUp(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's sign up",
-	})
 }
 
 // SignIn handler

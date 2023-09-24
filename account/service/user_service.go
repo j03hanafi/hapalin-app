@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/j03hanafi/hapalin-app/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain"
 )
 
 // UserService acts as a struct for injecting an implementation of UserRepository
@@ -32,4 +32,10 @@ func (s UserService) Get(ctx context.Context, uid uuid.UUID) (*domain.User, erro
 	u, err := s.UserRepository.FindByID(ctx, uid)
 
 	return u, err
+}
+
+// SignUp reaches a UserRepository to verify the
+// email address is available and signs up the user if this is the case
+func (s UserService) SignUp(ctx context.Context, u *domain.User) error {
+	panic("implement me")
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/j03hanafi/hapalin-app/domain"
-	"github.com/j03hanafi/hapalin-app/domain/mocks"
+	"github.com/j03hanafi/hapalin-app/account/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -16,6 +16,8 @@ func TestGet(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("success", func(t *testing.T) {
+		t.Parallel()
+
 		uid, _ := uuid.NewRandom()
 
 		mockResp := &domain.User{
@@ -42,6 +44,8 @@ func TestGet(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
+		t.Parallel()
+
 		uid, _ := uuid.NewRandom()
 
 		mockUserRepository := new(mocks.MockUserRepository)

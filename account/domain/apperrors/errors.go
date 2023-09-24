@@ -54,7 +54,7 @@ func (e Error) Status() int {
 // status code if the error is model.Error
 func Status(err error) int {
 	var e *Error
-	if errors.As(err, e) {
+	if errors.As(err, &e) {
 		return e.Status()
 	}
 	return http.StatusInternalServerError
