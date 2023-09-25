@@ -18,11 +18,11 @@ type IDTokenCustomClaims struct {
 
 // generateIDToken generates an IDToken which is a jwt with myCustomClaims
 // Could call this GenerateIDTokenString, but the signature makes this fairly clear
-func generateIDToken(u *domain.User, key *rsa.PrivateKey) (string, error) {
+func generateIDToken(u *domain.User, key *rsa.PrivateKey, exp int64) (string, error) {
 	l := logger.Get()
 
 	currentTime := time.Now()
-	tokenExp := currentTime.Add(time.Minute * 15) // 15 minutes
+	tokenExp := currentTime.Add(time.Duration(exp) * time.Second) // 15 minutes
 
 	claims := IDTokenCustomClaims{
 		User: u,
@@ -62,11 +62,11 @@ type RefreshTokenCustomClaims struct {
 
 // generateRefreshToken creates a refresh token
 // The refresh token stores only the user's ID, a string
-func generateRefreshToken(uid uuid.UUID, key string) (*RefreshToken, error) {
+func generateRefreshToken(uid uuid.UUID, key string, exp int64) (*RefreshToken, error) {
 	l := logger.Get()
 
 	currentTime := time.Now()
-	tokenExp := currentTime.AddDate(0, 0, 3) // 3 days
+	tokenExp := currentTime.Add(time.Duration(exp) * time.Second) // 3 days
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		l.Error("Error generating token id",

@@ -35,7 +35,7 @@ func TestMe(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("Get", mock.AnythingOfType("*gin.Context"), uid).
+			On("Get", mock.AnythingOfType("context.backgroundCtx"), uid).
 			Return(mockUserResp, nil)
 
 		// a response recorder for getting written http response

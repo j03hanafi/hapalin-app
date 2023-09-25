@@ -28,7 +28,8 @@ func (h Handler) Me(c *gin.Context) {
 	}
 	uid := user.(*domain.User).UID
 
-	u, err := h.UserService.Get(c, uid)
+	ctx := c.Request.Context()
+	u, err := h.UserService.Get(ctx, uid)
 	if err != nil {
 		l.Info("Unable to find user",
 			zap.String("user", uid.String()),

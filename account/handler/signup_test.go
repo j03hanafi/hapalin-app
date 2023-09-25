@@ -27,7 +27,7 @@ func TestSignUp(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), mock.AnythingOfType("*domain.User")).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), mock.AnythingOfType("*domain.User")).
 			Return(nil)
 
 		// a response recorder for getting written http response
@@ -62,7 +62,7 @@ func TestSignUp(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), mock.AnythingOfType("*domain.User")).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), mock.AnythingOfType("*domain.User")).
 			Return(nil)
 
 		// a response recorder for getting written http response
@@ -98,7 +98,7 @@ func TestSignUp(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), mock.AnythingOfType("*domain.User")).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), mock.AnythingOfType("*domain.User")).
 			Return(nil)
 
 		// a response recorder for getting written http response
@@ -134,7 +134,7 @@ func TestSignUp(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), mock.AnythingOfType("*domain.User")).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), mock.AnythingOfType("*domain.User")).
 			Return(nil)
 
 		// a response recorder for getting written http response
@@ -175,7 +175,7 @@ func TestSignUp(t *testing.T) {
 
 		mockUserService := new(mocks.MockUserService)
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), u).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), u).
 			Return(apperrors.NewConflict("User already exists", u.Email))
 
 		// a response recorder for getting written http response
@@ -223,10 +223,10 @@ func TestSignUp(t *testing.T) {
 		mockTokenService := new(mocks.MockTokenService)
 
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), u).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), u).
 			Return(nil)
 		mockTokenService.
-			On("NewPairFromUser", mock.AnythingOfType("*gin.Context"), u, "").
+			On("NewPairFromUser", mock.AnythingOfType("context.backgroundCtx"), u, "").
 			Return(mockTokenResp, nil)
 
 		// a response recorder for getting written http response
@@ -280,10 +280,10 @@ func TestSignUp(t *testing.T) {
 		mockTokenService := new(mocks.MockTokenService)
 
 		mockUserService.
-			On("SignUp", mock.AnythingOfType("*gin.Context"), u).
+			On("SignUp", mock.AnythingOfType("context.backgroundCtx"), u).
 			Return(nil)
 		mockTokenService.
-			On("NewPairFromUser", mock.AnythingOfType("*gin.Context"), u, "").
+			On("NewPairFromUser", mock.AnythingOfType("context.backgroundCtx"), u, "").
 			Return(nil, mockErrorResp)
 
 		// a response recorder for getting written http response
