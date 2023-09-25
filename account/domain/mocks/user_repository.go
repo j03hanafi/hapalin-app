@@ -2,7 +2,6 @@ package mocks
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"github.com/j03hanafi/hapalin-app/account/domain"
 	"github.com/stretchr/testify/mock"
@@ -24,7 +23,7 @@ func (m *MockUserRepository) FindByID(ctx context.Context, uid uuid.UUID) (*doma
 
 	var r1 error
 	if ret.Get(1) != nil {
-		errors.As(ret.Get(1).(error), &r1)
+		r1 = ret.Get(1).(error)
 	}
 
 	return r0, r1

@@ -9,14 +9,16 @@ import (
 
 // Handler struct holds required services for handler to function
 type Handler struct {
-	UserService domain.UserService
+	UserService  domain.UserService
+	TokenService domain.TokenService
 }
 
 // Config will hold services that will eventually be injected into this
 // handler layer on handler initialization
 type Config struct {
-	R           *gin.Engine
-	UserService domain.UserService
+	R            *gin.Engine
+	UserService  domain.UserService
+	TokenService domain.TokenService
 }
 
 // NewHandler initializes the handler with required injected services along with http routes
@@ -24,7 +26,8 @@ type Config struct {
 func NewHandler(c *Config) {
 	// Create a handler (which will later have injected services)
 	h := &Handler{
-		UserService: c.UserService,
+		UserService:  c.UserService,
+		TokenService: c.TokenService,
 	}
 
 	// Create a group, or base url for all routes
