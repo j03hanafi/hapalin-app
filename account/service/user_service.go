@@ -4,6 +4,9 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/j03hanafi/hapalin-app/account/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
+	"github.com/j03hanafi/hapalin-app/account/logger"
+	"go.uber.org/zap"
 )
 
 // UserService acts as a struct for injecting an implementation of UserRepository
@@ -37,5 +40,27 @@ func (s UserService) Get(ctx context.Context, uid uuid.UUID) (*domain.User, erro
 // SignUp reaches a UserRepository to verify the
 // email address is available and signs up the user if this is the case
 func (s UserService) SignUp(ctx context.Context, u *domain.User) error {
-	panic("implement me")
+	l := logger.Get()
+
+	pw, err := hashPassword(u.Password)
+	if err != nil {
+		l.Error("error hashing password",
+			zap.Error(err),
+		)
+		return apperrors.NewInternal()
+	}
+
+	u.Password = pw
+	if err := s.UserRepository.Create(ctx, u); err != nil {
+		return err
+	}
+
+	// If we get around to adding events, we'd Publish it here
+	// err := s.EventsBroker.PublishUserUpdated(u, true)
+
+	// if err != nil {
+	//  return nil, apperrors.NewInternal()
+	// }
+
+	return nil
 }
