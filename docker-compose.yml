@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  postgres-auth:
+  postgres-account:
     image: "postgres:alpine"
     environment:
       - POSTGRES_PASSWORD=password
@@ -9,7 +9,7 @@ services:
     #   Set a volume for data and initial sql script
     #   May configure initial db for future demo
     volumes:
-      - "pgdata_auth:/var/lib/postgresql/data"
+      - "pgdata_account:/var/lib/postgresql/data"
       # - ./init:/docker-entrypoint-initdb.d/
     command: ["postgres", "-c", "log_statement=all"]
   reverse-proxy:
@@ -39,13 +39,13 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.account.rule=Host(`hapalin.test`) && PathPrefix(`/api/account`)"
     env_file:
-      - .env.dev
+      - ./account/.env.dev
     volumes:
       - ./account:/go/src/app
     depends_on:
-      - postgres-auth
+      - postgres-account
     # have to use $$ (double-dollar) so docker doesn't try to substitute a variable
     command: reflex -v -r "\.go$$" -s -- sh -c "go run ./"
 
 volumes:
-  pgdata_auth:
+  pgdata_account:
