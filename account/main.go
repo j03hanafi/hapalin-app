@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/j03hanafi/hapalin-app/account/handler"
 	"github.com/j03hanafi/hapalin-app/account/logger"
 	"go.uber.org/zap"
 	"net/http"
@@ -12,8 +10,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
-	ginzap "github.com/gin-contrib/zap"
 )
 
 func main() {
@@ -25,14 +21,19 @@ func main() {
 
 	l.Info("Server is starting...")
 
-	router := gin.New()
+	ds, err := initDS()
+	if err != nil {
+		l.Fatal("Failed to initialize data sources: ",
+			zap.Error(err),
+		)
+	}
 
-	router.Use(ginzap.Ginzap(l, time.RFC3339, false))
-	router.Use(ginzap.RecoveryWithZap(l, true))
-
-	handler.NewHandler(&handler.Config{
-		R: router,
-	})
+	router, err := inject(ds)
+	if err != nil {
+		l.Fatal("Failed to initialize router: ",
+			zap.Error(err),
+		)
+	}
 
 	server := &http.Server{
 		Handler: router,
@@ -62,6 +63,13 @@ func main() {
 	// Context for informing server to close the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	// Shut down data sources
+	if err := ds.close(); err != nil {
+		l.Fatal("Failed to close data sources: ",
+			zap.Error(err),
+		)
+	}
 
 	// Shut down server
 	l.Info("Server is shutting down...")

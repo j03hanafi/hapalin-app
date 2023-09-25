@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
 	"github.com/j03hanafi/hapalin-app/account/domain"
 	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
@@ -47,11 +46,10 @@ func (r PGUserRepository) Create(ctx context.Context, u *domain.User) error {
 
 	if err := r.DB.Get(u, query, u.Email, u.Password); err != nil {
 		// check unique constraint
-		var errPQ *pq.Error
-		if errors.As(errPQ, &errPQ) && errPQ.Code.Name() == "unique_violation" {
+		if err, ok := err.(*pq.Error); ok && err.Code.Name() == "unique_violation" {
 			l.Info("Could not create a user",
 				zap.String("email", u.Email),
-				zap.String("reason", errPQ.Code.Name()),
+				zap.String("reason", err.Code.Name()),
 			)
 			return apperrors.NewConflict("email", u.Email)
 		}
