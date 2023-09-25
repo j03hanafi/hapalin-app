@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
@@ -20,6 +21,17 @@ type invalidArgument struct {
 // bindData is helper function, returns false if data is not bound
 func bindData(c *gin.Context, req interface{}) bool {
 	l := logger.Get()
+
+	if c.ContentType() != "application/json" {
+		msg := fmt.Sprintf("%s only accepts Content-Type application/json", c.FullPath())
+
+		err := apperrors.NewUnsupportedMediaType(msg)
+
+		c.JSON(err.Status(), gin.H{
+			"error": err,
+		})
+		return false
+	}
 
 	// Bind incoming json to struct and check for validation errors
 	if err := c.ShouldBind(req); err != nil {

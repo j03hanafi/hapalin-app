@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/j03hanafi/hapalin-app/account/domain"
 	"net/http"
-	"os"
 )
 
 // Handler struct holds required services for handler to function
@@ -19,6 +18,7 @@ type Config struct {
 	R            *gin.Engine
 	UserService  domain.UserService
 	TokenService domain.TokenService
+	BaseURL      string
 }
 
 // NewHandler initializes the handler with required injected services along with http routes
@@ -31,7 +31,7 @@ func NewHandler(c *Config) {
 	}
 
 	// Create a group, or base url for all routes
-	g := c.R.Group(os.Getenv("ACCOUNT_API_URL"))
+	g := c.R.Group(c.BaseURL)
 
 	g.GET("/me", h.Me)
 	g.POST("/signup", h.SignUp)

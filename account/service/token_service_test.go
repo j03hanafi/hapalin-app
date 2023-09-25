@@ -12,6 +12,9 @@ import (
 )
 
 func TestNewPairFromUser(t *testing.T) {
+	var idExp int64 = 15 * 60
+	var refreshExp int64 = 3 * 24 * 2600
+
 	private, _ := os.ReadFile("../rsa_private_test.pem")
 	privateKey, _ := jwt.ParseRSAPrivateKeyFromPEM(private)
 	public, _ := os.ReadFile("../rsa_public_test.pem")
@@ -19,10 +22,12 @@ func TestNewPairFromUser(t *testing.T) {
 	secret := "aNotSoRandomSecret"
 
 	// instantiate a common token service to be used by all tests
-	tokenService := NewTokenService(&TSConfig{
-		PrivateKey:    privateKey,
-		PublicKey:     publicKey,
-		RefreshSecret: secret,
+	tokenServ := NewTokenService(&TSConfig{
+		PrivateKey:            privateKey,
+		PublicKey:             publicKey,
+		RefreshSecret:         secret,
+		IDExpirationSecs:      idExp,
+		RefreshExpirationSecs: refreshExp,
 	})
 
 	// include password to make sure it is not serialized
@@ -36,7 +41,7 @@ func TestNewPairFromUser(t *testing.T) {
 
 	t.Run("Returns a token pair with values", func(t *testing.T) {
 		ctx := context.TODO()
-		tokenPair, err := tokenService.NewPairFromUser(ctx, user, "")
+		tokenPair, err := tokenServ.NewPairFromUser(ctx, user, "")
 		assert.NoError(t, err)
 
 		var s string
@@ -71,7 +76,7 @@ func TestNewPairFromUser(t *testing.T) {
 		assert.Empty(t, idTokenClaims.User.Password) // password should never be encoded to json
 
 		expiresAt := time.Unix(idTokenClaims.RegisteredClaims.ExpiresAt.Unix(), 0)
-		expectedExpiresAt := time.Now().Add(time.Minute * 15)
+		expectedExpiresAt := time.Now().Add(time.Duration(idExp) * time.Second)
 		assert.WithinDuration(t, expectedExpiresAt, expiresAt, 5*time.Second)
 
 		refreshTokenClaims := &RefreshTokenCustomClaims{}
@@ -84,7 +89,7 @@ func TestNewPairFromUser(t *testing.T) {
 		assert.Equal(t, user.UID, refreshTokenClaims.UID)
 
 		expiresAt = time.Unix(refreshTokenClaims.RegisteredClaims.ExpiresAt.Unix(), 0)
-		expectedExpiresAt = time.Now().AddDate(0, 0, 3)
+		expectedExpiresAt = time.Now().Add(time.Duration(refreshExp) * time.Second)
 		assert.WithinDuration(t, expectedExpiresAt, expiresAt, 5*time.Second)
 	})
 }

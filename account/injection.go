@@ -10,6 +10,7 @@ import (
 	"github.com/j03hanafi/hapalin-app/account/service"
 	"go.uber.org/zap"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -65,13 +66,33 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		return nil, err
 	}
 
-	// load refresh token secret from env variable
+	// load token service env variable
 	refreshSecret := os.Getenv("REFRESH_SECRET")
+	idTokenExp := os.Getenv("ID_TOKEN_EXP")
+	refreshTokenExp := os.Getenv("REFRESH_TOKEN_EXP")
+
+	idExp, err := strconv.ParseInt(idTokenExp, 0, 64)
+	if err != nil {
+		l.Fatal("failed to parse id token expiration",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	refreshExp, err := strconv.ParseInt(refreshTokenExp, 0, 64)
+	if err != nil {
+		l.Fatal("failed to parse refresh token expiration",
+			zap.Error(err),
+		)
+		return nil, err
+	}
 
 	tokenService := service.NewTokenService(&service.TSConfig{
-		PrivateKey:    privateKey,
-		PublicKey:     publicKey,
-		RefreshSecret: refreshSecret,
+		PrivateKey:            privateKey,
+		PublicKey:             publicKey,
+		RefreshSecret:         refreshSecret,
+		IDExpirationSecs:      idExp,
+		RefreshExpirationSecs: refreshExp,
 	})
 
 	// initialize gin.Engine
@@ -83,6 +104,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		R:            router,
 		UserService:  userService,
 		TokenService: tokenService,
+		BaseURL:      os.Getenv("ACCOUNT_API_URL"),
 	})
 
 	return router, nil
