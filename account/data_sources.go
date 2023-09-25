@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/j03hanafi/hapalin-app/account/logger"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"os"
 )
 
 type dataSources struct {
-	DB *sqlx.DB
+	DB          *sqlx.DB
+	RedisClient *redis.Client
 }
 
 // InitDS establishes connections to fields in dataSources
@@ -50,8 +53,29 @@ func initDS() (*dataSources, error) {
 		return nil, err
 	}
 
+	// Initialize Redis connection
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+
+	l.Info("Connecting to Redis...")
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", redisHost, redisPort),
+		Password: "",
+		DB:       0,
+	})
+
+	// Verify Redis connection is working
+	if _, err = rdb.Ping(context.Background()).Result(); err != nil {
+		l.Error("Error pinging Redis",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
 	return &dataSources{
-		DB: db,
+		DB:          db,
+		RedisClient: rdb,
 	}, nil
 }
 
@@ -60,6 +84,13 @@ func (ds *dataSources) close() error {
 	l := logger.Get()
 	if err := ds.DB.Close(); err != nil {
 		l.Error("Error closing Postgres connection",
+			zap.Error(err),
+		)
+		return err
+	}
+
+	if err := ds.RedisClient.Close(); err != nil {
+		l.Error("Error closing Redis connection",
 			zap.Error(err),
 		)
 		return err

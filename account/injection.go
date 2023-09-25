@@ -24,6 +24,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	l.Info("injecting data sources into repository layer")
 
 	userRepository := repository.NewUserRepository(d.DB)
+	tokenRepository := repository.NewTokenRepository(d.RedisClient)
 
 	l.Info("injecting repository layer into service layer")
 
@@ -93,6 +94,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		RefreshSecret:         refreshSecret,
 		IDExpirationSecs:      idExp,
 		RefreshExpirationSecs: refreshExp,
+		TokenRepository:       tokenRepository,
 	})
 
 	// initialize gin.Engine
