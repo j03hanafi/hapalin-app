@@ -3,7 +3,10 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/j03hanafi/hapalin-app/account/domain"
+	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
+	"github.com/j03hanafi/hapalin-app/account/handler/middleware"
 	"net/http"
+	"time"
 )
 
 // Handler struct holds required services for handler to function
@@ -15,10 +18,11 @@ type Handler struct {
 // Config will hold services that will eventually be injected into this
 // handler layer on handler initialization
 type Config struct {
-	R            *gin.Engine
-	UserService  domain.UserService
-	TokenService domain.TokenService
-	BaseURL      string
+	R               *gin.Engine
+	UserService     domain.UserService
+	TokenService    domain.TokenService
+	BaseURL         string
+	TimeoutDuration time.Duration
 }
 
 // NewHandler initializes the handler with required injected services along with http routes
@@ -33,6 +37,10 @@ func NewHandler(c *Config) {
 	// Create a group, or base url for all routes
 	g := c.R.Group(c.BaseURL)
 
+	if gin.Mode() != gin.TestMode {
+		g.Use(middleware.Timeout(c.TimeoutDuration, apperrors.NewServiceUnavailable()))
+	}
+
 	g.GET("/me", h.Me)
 	g.POST("/signup", h.SignUp)
 	g.GET("/signin", h.SignIn)
@@ -45,6 +53,7 @@ func NewHandler(c *Config) {
 
 // SignIn handler
 func (h Handler) SignIn(c *gin.Context) {
+	time.Sleep(6 * time.Second)
 	c.JSON(http.StatusOK, gin.H{
 		"hello": "it's sign in",
 	})

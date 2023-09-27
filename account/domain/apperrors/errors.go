@@ -18,6 +18,7 @@ const (
 	NotFound             Type = "NOTFOUND"             // For not finding resource
 	PayloadTooLarge      Type = "PAYLOADTOOLARGE"      // for uploading tons of JSON, or an image over the limit - 413
 	UnsupportedMediaType Type = "UNSUPPORTEDMEDIATYPE" // for http 415
+	ServiceUnavailable   Type = "SERVICEUNAVAILABLE"   // // For long running handlers
 )
 
 type Error struct {
@@ -47,6 +48,8 @@ func (e Error) Status() int {
 		return http.StatusRequestEntityTooLarge
 	case UnsupportedMediaType:
 		return http.StatusUnsupportedMediaType
+	case ServiceUnavailable:
+		return http.StatusServiceUnavailable
 	default:
 		return http.StatusInternalServerError
 	}
@@ -120,5 +123,13 @@ func NewUnsupportedMediaType(reason string) *Error {
 	return &Error{
 		Type:    UnsupportedMediaType,
 		Message: reason,
+	}
+}
+
+// NewServiceUnavailable to create an error for 503
+func NewServiceUnavailable() *Error {
+	return &Error{
+		Type:    ServiceUnavailable,
+		Message: "Service unavailable or timed out.",
 	}
 }
