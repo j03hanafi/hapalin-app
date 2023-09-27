@@ -90,3 +90,19 @@ func (t tokenService) NewPairFromUser(ctx context.Context, u *domain.User, prevT
 		RefreshToken: refreshToken.SS,
 	}, nil
 }
+
+// ValidateIDToken validates the id token jwt string
+// It returns the user extract from the IDTokenCustomClaims
+func (t tokenService) ValidateIDToken(tokenString string) (*domain.User, error) {
+	l := logger.Get()
+
+	claims, err := validateIDToken(tokenString, t.PublicKey)
+	if err != nil {
+		l.Error("Error validating ID Token",
+			zap.Error(err),
+		)
+		return nil, apperrors.NewAuthorization("Invalid ID Token")
+	}
+
+	return claims.User, nil
+}

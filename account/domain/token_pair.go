@@ -15,6 +15,7 @@ type TokenPair struct {
 // with in regard to producing JWTs as string
 type TokenService interface {
 	NewPairFromUser(ctx context.Context, u *User, prevTokenID string) (*TokenPair, error)
+	ValidateIDToken(tokenString string) (*User, error)
 }
 
 // TokenRepository defines methods it expects a repository
