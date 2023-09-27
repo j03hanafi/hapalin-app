@@ -97,16 +97,27 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		TokenRepository:       tokenRepository,
 	})
 
+	// read HANDLER_TIMEOUT
+	handlerTimeout := os.Getenv("HANDLER_TIMEOUT")
+	ht, err := strconv.ParseInt(handlerTimeout, 0, 64)
+	if err != nil {
+		l.Error("failed to parse handler timeout",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
 	// initialize gin.Engine
 	router := gin.New()
 	router.Use(ginzap.Ginzap(l, time.RFC3339, false))
 	router.Use(ginzap.RecoveryWithZap(l, true))
 
 	handler.NewHandler(&handler.Config{
-		R:            router,
-		UserService:  userService,
-		TokenService: tokenService,
-		BaseURL:      os.Getenv("ACCOUNT_API_URL"),
+		R:               router,
+		UserService:     userService,
+		TokenService:    tokenService,
+		BaseURL:         os.Getenv("ACCOUNT_API_URL"),
+		TimeoutDuration: time.Duration(ht) * time.Second,
 	})
 
 	return router, nil
