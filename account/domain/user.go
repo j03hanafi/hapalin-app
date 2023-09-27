@@ -26,6 +26,7 @@ type UserService interface {
 // UserRepository defines methods the service layer expects
 // any repository it interacts with to implement
 type UserRepository interface {
+	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByID(ctx context.Context, uid uuid.UUID) (*User, error)
 	Create(ctx context.Context, u *User) error
 }

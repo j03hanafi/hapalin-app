@@ -62,3 +62,17 @@ func (r pgUserRepository) Create(ctx context.Context, u *domain.User) error {
 
 	return nil
 }
+
+// FindByEmail retrieves user row by email address
+func (r pgUserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+	user := &domain.User{}
+
+	query := "SELECT * FROM users WHERE email=$1"
+
+	// we need to actually check errors as it could be something other than not found
+	if err := r.DB.GetContext(ctx, user, query, email); err != nil {
+		return user, apperrors.NewNotFound("email", email)
+	}
+
+	return user, nil
+}
