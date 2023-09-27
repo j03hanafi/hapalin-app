@@ -43,20 +43,12 @@ func NewHandler(c *Config) {
 
 	g.GET("/me", h.Me)
 	g.POST("/signup", h.SignUp)
-	g.GET("/signin", h.SignIn)
+	g.POST("/signin", h.SignIn)
 	g.GET("/signout", h.SignOut)
 	g.GET("/tokens", h.Tokens)
 	g.GET("/image", h.Image)
 	g.GET("/deleteimage", h.DeleteImage)
 	g.GET("/details", h.Details)
-}
-
-// SignIn handler
-func (h Handler) SignIn(c *gin.Context) {
-	time.Sleep(6 * time.Second)
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's sign in",
-	})
 }
 
 // SignOut handler

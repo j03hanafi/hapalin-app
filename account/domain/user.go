@@ -20,11 +20,13 @@ type User struct {
 type UserService interface {
 	Get(ctx context.Context, uid uuid.UUID) (*User, error)
 	SignUp(ctx context.Context, u *User) error
+	SignIn(ctx context.Context, u *User) error
 }
 
 // UserRepository defines methods the service layer expects
 // any repository it interacts with to implement
 type UserRepository interface {
+	FindByEmail(ctx context.Context, email string) (*User, error)
 	FindByID(ctx context.Context, uid uuid.UUID) (*User, error)
 	Create(ctx context.Context, u *User) error
 }

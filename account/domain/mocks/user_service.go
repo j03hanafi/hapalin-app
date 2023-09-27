@@ -39,3 +39,15 @@ func (m *MockUserService) SignUp(ctx context.Context, u *domain.User) error {
 
 	return r0
 }
+
+// SignIn is a mock of UserService.SignIn
+func (m *MockUserService) SignIn(ctx context.Context, u *domain.User) error {
+	args := m.Called(ctx, u)
+
+	var r0 error
+	if args.Get(0) != nil {
+		r0 = args.Error(0)
+	}
+
+	return r0
+}

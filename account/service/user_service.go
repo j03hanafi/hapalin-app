@@ -64,3 +64,29 @@ func (s userService) SignUp(ctx context.Context, u *domain.User) error {
 
 	return nil
 }
+
+// SignIn reaches our to a UserRepository check if the user exists
+// and then compares the supplied password with the provided password
+// if a valid email/password combo is provided, u will hold all
+// available user fields
+func (s userService) SignIn(ctx context.Context, u *domain.User) error {
+	uFetched, err := s.UserRepository.FindByEmail(ctx, u.Email)
+
+	// Will return NotAuthorized to client to omit details of why
+	if err != nil {
+		return apperrors.NewAuthorization("Invalid email/password combination")
+	}
+
+	// verify password - we previously created this method
+	match, err := comparePasswords(uFetched.Password, u.Password)
+	if err != nil {
+		return apperrors.NewInternal()
+	}
+
+	if !match {
+		return apperrors.NewAuthorization("Invalid email/password combination")
+	}
+
+	u = uFetched
+	return nil
+}
