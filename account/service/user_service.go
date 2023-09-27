@@ -87,6 +87,6 @@ func (s userService) SignIn(ctx context.Context, u *domain.User) error {
 		return apperrors.NewAuthorization("Invalid email/password combination")
 	}
 
-	u = uFetched
+	*u = *uFetched
 	return nil
 }
