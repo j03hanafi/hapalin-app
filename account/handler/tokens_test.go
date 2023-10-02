@@ -20,12 +20,9 @@ import (
 
 func TestTokens(t *testing.T) {
 	t.Parallel()
-
-	// Setup
 	gin.SetMode(gin.TestMode)
 	l := logger.Get()
 
-	// Setup mock services, gin engine/router, handler layer
 	mockTokenService := new(mocks.MockTokenService)
 	mockUserService := new(mocks.MockUserService)
 
@@ -40,80 +37,73 @@ func TestTokens(t *testing.T) {
 	})
 
 	t.Run("Invalid request", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
 		// a response recorder for getting written http response
 		rr := httptest.NewRecorder()
 
 		// create a request body with invalid fields
-		reqBody, err := json.Marshal(gin.H{
-			"no_refresh_token": "invalidRefreshToken",
+		reqBody, _ := json.Marshal(gin.H{
+			"notRefreshToken": "this key is not valid for this handler!",
 		})
-		assert.NoError(t, err)
 
-		request, err := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
-
+		request, _ := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
 		request.Header.Set("Content-Type", "application/json")
 		router.ServeHTTP(rr, request)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-
 		mockTokenService.AssertNotCalled(t, "ValidateRefreshToken")
 		mockUserService.AssertNotCalled(t, "Get")
 		mockTokenService.AssertNotCalled(t, "NewPairFromUser")
 	})
 
 	t.Run("Invalid token", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
-		invalidTokenString := "invalidToken"
-		mockErrorMessage := "authProblem"
-		mockErr := apperrors.NewAuthorization(mockErrorMessage)
+		invalidTokenString := "invalid"
+		mockErrorMessage := "authProbs"
+		mockError := apperrors.NewAuthorization(mockErrorMessage)
 
 		mockTokenService.
 			On("ValidateRefreshToken", invalidTokenString).
-			Return(nil, mockErr)
+			Return(nil, mockError)
 
 		// a response recorder for getting written http response
 		rr := httptest.NewRecorder()
 
-		// create a request body with invalid token
-		reqBody, err := json.Marshal(gin.H{
+		// create a request body with invalid fields
+		reqBody, _ := json.Marshal(gin.H{
 			"refresh_token": invalidTokenString,
 		})
-		assert.NoError(t, err)
 
-		request, err := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
-
+		request, _ := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
 		request.Header.Set("Content-Type", "application/json")
 		router.ServeHTTP(rr, request)
 
-		respBody, err := json.Marshal(gin.H{
-			"error": mockErr,
+		respBody, _ := json.Marshal(gin.H{
+			"error": mockError,
 		})
-		assert.NoError(t, err)
 
-		assert.Equal(t, mockErr.Status(), rr.Code)
+		assert.Equal(t, mockError.Status(), rr.Code)
 		assert.Equal(t, respBody, rr.Body.Bytes())
-
 		mockTokenService.AssertCalled(t, "ValidateRefreshToken", invalidTokenString)
 		mockUserService.AssertNotCalled(t, "Get")
 		mockTokenService.AssertNotCalled(t, "NewPairFromUser")
 	})
 
-	t.Run("Failure create a new token pair", func(t *testing.T) {
-		//t.Parallel()
+	t.Run("Failure to create new token pair", func(t *testing.T) {
+		t.Parallel()
 
-		validTokenString := "validToken"
+		validTokenString := "valid"
 		mockTokenID, _ := uuid.NewRandom()
 		mockUserID, _ := uuid.NewRandom()
+
 		mockRefreshTokenResp := &domain.RefreshToken{
+			SS:  validTokenString,
 			ID:  mockTokenID,
 			UID: mockUserID,
-			SS:  validTokenString,
 		}
+
 		mockTokenService.
 			On("ValidateRefreshToken", validTokenString).
 			Return(mockRefreshTokenResp, nil)
@@ -125,16 +115,18 @@ func TestTokens(t *testing.T) {
 			mock.AnythingOfType("context.backgroundCtx"),
 			mockRefreshTokenResp.UID,
 		}
+
 		mockUserService.
 			On("Get", getArgs...).
 			Return(mockUserResp, nil)
 
-		mockError := apperrors.NewAuthorization("invalid refresh token")
+		mockError := apperrors.NewAuthorization("Invalid refresh token")
 		newPairArgs := mock.Arguments{
 			mock.AnythingOfType("context.backgroundCtx"),
 			mockUserResp,
 			mockRefreshTokenResp.ID.String(),
 		}
+
 		mockTokenService.
 			On("NewPairFromUser", newPairArgs...).
 			Return(nil, mockError)
@@ -142,42 +134,39 @@ func TestTokens(t *testing.T) {
 		// a response recorder for getting written http response
 		rr := httptest.NewRecorder()
 
-		// create a request body with valid token
-		reqBody, err := json.Marshal(gin.H{
+		// create a request body with invalid fields
+		reqBody, _ := json.Marshal(gin.H{
 			"refresh_token": validTokenString,
 		})
-		assert.NoError(t, err)
 
-		request, err := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
-
+		request, _ := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
 		request.Header.Set("Content-Type", "application/json")
 		router.ServeHTTP(rr, request)
 
-		respBody, err := json.Marshal(gin.H{
+		respBody, _ := json.Marshal(gin.H{
 			"error": mockError,
 		})
-		assert.NoError(t, err)
 
 		assert.Equal(t, mockError.Status(), rr.Code)
 		assert.Equal(t, respBody, rr.Body.Bytes())
-
 		mockTokenService.AssertCalled(t, "ValidateRefreshToken", validTokenString)
 		mockUserService.AssertCalled(t, "Get", getArgs...)
 		mockTokenService.AssertCalled(t, "NewPairFromUser", newPairArgs...)
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		//t.Parallel()
+		t.Parallel()
 
-		validTokenString := "validToken"
+		validTokenString := "anothervalid"
 		mockTokenID, _ := uuid.NewRandom()
 		mockUserID, _ := uuid.NewRandom()
+
 		mockRefreshTokenResp := &domain.RefreshToken{
+			SS:  validTokenString,
 			ID:  mockTokenID,
 			UID: mockUserID,
-			SS:  validTokenString,
 		}
+
 		mockTokenService.
 			On("ValidateRefreshToken", validTokenString).
 			Return(mockRefreshTokenResp, nil)
@@ -189,6 +178,7 @@ func TestTokens(t *testing.T) {
 			mock.AnythingOfType("context.backgroundCtx"),
 			mockRefreshTokenResp.UID,
 		}
+
 		mockUserService.
 			On("Get", getArgs...).
 			Return(mockUserResp, nil)
@@ -196,20 +186,20 @@ func TestTokens(t *testing.T) {
 		mockNewTokenID, _ := uuid.NewRandom()
 		mockNewUserID, _ := uuid.NewRandom()
 		mockTokenPairResp := &domain.TokenPair{
-			IDToken: domain.IDToken{
-				SS: "aNewIDToken",
-			},
+			IDToken: domain.IDToken{SS: "aNewIDToken"},
 			RefreshToken: domain.RefreshToken{
+				SS:  "aNewRefreshToken",
 				ID:  mockNewTokenID,
 				UID: mockNewUserID,
-				SS:  "aNewRefreshToken",
 			},
 		}
+
 		newPairArgs := mock.Arguments{
 			mock.AnythingOfType("context.backgroundCtx"),
 			mockUserResp,
 			mockRefreshTokenResp.ID.String(),
 		}
+
 		mockTokenService.
 			On("NewPairFromUser", newPairArgs...).
 			Return(mockTokenPairResp, nil)
@@ -217,29 +207,25 @@ func TestTokens(t *testing.T) {
 		// a response recorder for getting written http response
 		rr := httptest.NewRecorder()
 
-		// create a request body with valid token
-		reqBody, err := json.Marshal(gin.H{
+		// create a request body with invalid fields
+		reqBody, _ := json.Marshal(gin.H{
 			"refresh_token": validTokenString,
 		})
-		assert.NoError(t, err)
 
-		request, err := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
-		assert.NoError(t, err)
-
+		request, _ := http.NewRequest(http.MethodPost, "/tokens", bytes.NewBuffer(reqBody))
 		request.Header.Set("Content-Type", "application/json")
 		router.ServeHTTP(rr, request)
 
-		respBody, err := json.Marshal(gin.H{
+		respBody, _ := json.Marshal(gin.H{
 			"tokens": mockTokenPairResp,
 		})
-		assert.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, respBody, rr.Body.Bytes())
-
 		mockTokenService.AssertCalled(t, "ValidateRefreshToken", validTokenString)
 		mockUserService.AssertCalled(t, "Get", getArgs...)
 		mockTokenService.AssertCalled(t, "NewPairFromUser", newPairArgs...)
 	})
 
+	// TODO - User not found
 }
