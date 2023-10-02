@@ -86,6 +86,8 @@ func TestNewPairFromUser(t *testing.T) {
 		Return(nil)
 
 	t.Run("Returns a token pair with values", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		tokenPair, err := tokenServ.NewPairFromUser(ctx, user, prevID)
 		assert.NoError(t, err)
@@ -96,13 +98,13 @@ func TestNewPairFromUser(t *testing.T) {
 		mockTokenRepository.AssertCalled(t, "DeleteRefreshToken", deleteWithPrevIDArguments...)
 
 		var s string
-		assert.IsType(t, s, tokenPair.IDToken)
+		assert.IsType(t, s, tokenPair.IDToken.SS)
 
 		// decode the Base64URL encoded string
 		// simpler to use jwt library which is already imported
-		idTokenClaims := &IDTokenCustomClaims{}
+		idTokenClaims := &idTokenCustomClaims{}
 
-		_, err = jwt.ParseWithClaims(tokenPair.IDToken, idTokenClaims, func(token *jwt.Token) (interface{}, error) {
+		_, err = jwt.ParseWithClaims(tokenPair.IDToken.SS, idTokenClaims, func(token *jwt.Token) (interface{}, error) {
 			return publicKey, nil
 		})
 		assert.NoError(t, err)
@@ -130,13 +132,13 @@ func TestNewPairFromUser(t *testing.T) {
 		expectedExpiresAt := time.Now().Add(time.Duration(idExp) * time.Second)
 		assert.WithinDuration(t, expectedExpiresAt, expiresAt, 5*time.Second)
 
-		refreshTokenClaims := &RefreshTokenCustomClaims{}
-		_, err = jwt.ParseWithClaims(tokenPair.RefreshToken, refreshTokenClaims, func(token *jwt.Token) (interface{}, error) {
+		refreshTokenClaims := &refreshTokenCustomClaims{}
+		_, err = jwt.ParseWithClaims(tokenPair.RefreshToken.SS, refreshTokenClaims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		})
 		assert.NoError(t, err)
 
-		assert.IsType(t, s, tokenPair.RefreshToken)
+		assert.IsType(t, s, tokenPair.RefreshToken.SS)
 		assert.Equal(t, user.UID, refreshTokenClaims.UID)
 
 		expiresAt = time.Unix(refreshTokenClaims.RegisteredClaims.ExpiresAt.Unix(), 0)
@@ -145,6 +147,8 @@ func TestNewPairFromUser(t *testing.T) {
 	})
 
 	t.Run("Error setting refresh token", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		_, err := tokenServ.NewPairFromUser(ctx, uErrorCase, "")
 		assert.Error(t, err)
@@ -156,6 +160,8 @@ func TestNewPairFromUser(t *testing.T) {
 	})
 
 	t.Run("Empty string provided for prevID", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		_, err := tokenServ.NewPairFromUser(ctx, user, "")
 		assert.NoError(t, err)

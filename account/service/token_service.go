@@ -69,7 +69,7 @@ func (t tokenService) NewPairFromUser(ctx context.Context, u *domain.User, prevT
 	}
 
 	// set refresh tokens by calling TokenRepository methods
-	if err = t.TokenRepository.SetRefreshToken(ctx, u.UID.String(), refreshToken.ID, refreshToken.ExpiresIn); err != nil {
+	if err = t.TokenRepository.SetRefreshToken(ctx, u.UID.String(), refreshToken.ID.String(), refreshToken.ExpiresIn); err != nil {
 		l.Error("Error saving refresh token for user",
 			zap.Error(err),
 		)
@@ -86,13 +86,13 @@ func (t tokenService) NewPairFromUser(ctx context.Context, u *domain.User, prevT
 	}
 
 	return &domain.TokenPair{
-		IDToken:      idToken,
-		RefreshToken: refreshToken.SS,
+		IDToken:      domain.IDToken{SS: idToken},
+		RefreshToken: domain.RefreshToken{SS: refreshToken.SS, ID: refreshToken.ID, UID: u.UID},
 	}, nil
 }
 
 // ValidateIDToken validates the id token jwt string
-// It returns the user extract from the IDTokenCustomClaims
+// It returns the user extract from the idTokenCustomClaims
 func (t tokenService) ValidateIDToken(tokenString string) (*domain.User, error) {
 	l := logger.Get()
 
