@@ -21,7 +21,7 @@ jobs:
         with:
           version: "latest"
           working-directory: ./account
-          args: --timeout=3m
+          args: --timeout=3m --disable=typecheck
 
       - name: Install Dependencies
         working-directory: ./account

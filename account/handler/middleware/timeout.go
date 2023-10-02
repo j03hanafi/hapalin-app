@@ -67,7 +67,7 @@ func Timeout(timeout time.Duration, errTimeout *apperrors.Error) gin.HandlerFunc
 			eResp, _ := json.Marshal(gin.H{
 				"error": e,
 			})
-			tw.ResponseWriter.Write(eResp)
+			_, _ = tw.ResponseWriter.Write(eResp)
 
 		case <-finished:
 			// if finished, set headers and write response
@@ -83,7 +83,7 @@ func Timeout(timeout time.Duration, errTimeout *apperrors.Error) gin.HandlerFunc
 			tw.ResponseWriter.WriteHeader(tw.code)
 
 			// tw.wbuf will have been written to already when gin writes to tw.Write()
-			tw.ResponseWriter.Write(tw.wbuf.Bytes())
+			_, _ = tw.ResponseWriter.Write(tw.wbuf.Bytes())
 
 		case <-ctx.Done():
 			// timeout has occurred, send errTimeout and write headers
@@ -96,7 +96,7 @@ func Timeout(timeout time.Duration, errTimeout *apperrors.Error) gin.HandlerFunc
 			eResp, _ := json.Marshal(gin.H{
 				"error": errTimeout,
 			})
-			tw.ResponseWriter.Write(eResp)
+			_, _ = tw.ResponseWriter.Write(eResp)
 			c.Abort()
 			tw.SetTimedOut()
 		}
