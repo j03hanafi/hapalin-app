@@ -2,13 +2,28 @@ package domain
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"time"
 )
 
 // TokenPair used for returning pairs of id and refresh tokens
 type TokenPair struct {
-	IDToken      string `json:"id_token"`
-	RefreshToken string `json:"refresh_token"`
+	IDToken
+	RefreshToken
+}
+
+// RefreshToken stores token properties that
+// are accessed in multiple application layer
+type RefreshToken struct {
+	ID  uuid.UUID `json:"-"`
+	UID uuid.UUID `json:"-"`
+	SS  string    `json:"refresh_token"`
+}
+
+// IDToken stores token properties that
+// are accessed in multiple application layers
+type IDToken struct {
+	SS string `json:"id_token"`
 }
 
 // TokenService defines methods the handler layer expects to interact
