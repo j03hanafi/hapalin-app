@@ -86,6 +86,8 @@ func TestNewPairFromUser(t *testing.T) {
 		Return(nil)
 
 	t.Run("Returns a token pair with values", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		tokenPair, err := tokenServ.NewPairFromUser(ctx, user, prevID)
 		assert.NoError(t, err)
@@ -145,6 +147,8 @@ func TestNewPairFromUser(t *testing.T) {
 	})
 
 	t.Run("Error setting refresh token", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		_, err := tokenServ.NewPairFromUser(ctx, uErrorCase, "")
 		assert.Error(t, err)
@@ -156,6 +160,8 @@ func TestNewPairFromUser(t *testing.T) {
 	})
 
 	t.Run("Empty string provided for prevID", func(t *testing.T) {
+		t.Parallel()
+
 		ctx := context.Background()
 		_, err := tokenServ.NewPairFromUser(ctx, user, "")
 		assert.NoError(t, err)
