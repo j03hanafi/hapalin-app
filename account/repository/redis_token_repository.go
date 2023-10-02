@@ -46,13 +46,26 @@ func (r redisTokenRepository) SetRefreshToken(ctx context.Context, userID, token
 func (r redisTokenRepository) DeleteRefreshToken(ctx context.Context, userID, prevTokenID string) error {
 	l := logger.Get()
 	key := fmt.Sprintf("%s:%s", userID, prevTokenID)
-	if err := r.Redis.Del(ctx, key).Err(); err != nil {
+
+	result := r.Redis.Del(ctx, key)
+
+	if err := result.Err(); err != nil {
 		l.Error("Could not delete refresh token to redis",
 			zap.String("userID", userID),
 			zap.String("prevTokenID", prevTokenID),
 			zap.Error(err),
 		)
 		return apperrors.NewInternal()
+	}
+
+	// Val returns count of deleted keys
+	// If no key was deleted, the refresh token is invalid
+	if result.Val() < 1 {
+		l.Error("Refresh token does not exist in redis",
+			zap.String("userID", userID),
+			zap.String("prevTokenID", prevTokenID),
+		)
+		return apperrors.NewAuthorization("Invalid refresh token")
 	}
 
 	return nil

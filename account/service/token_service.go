@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"crypto/rsa"
+	"github.com/google/uuid"
 	"github.com/j03hanafi/hapalin-app/account/domain"
 	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
 	"github.com/j03hanafi/hapalin-app/account/logger"
@@ -51,6 +52,16 @@ func NewTokenService(c *TSConfig) domain.TokenService {
 func (t tokenService) NewPairFromUser(ctx context.Context, u *domain.User, prevTokenID string) (*domain.TokenPair, error) {
 	l := logger.Get()
 
+	// delete user's current refresh token (used when refreshing idToken)
+	if prevTokenID != "" {
+		if err := t.TokenRepository.DeleteRefreshToken(ctx, u.UID.String(), prevTokenID); err != nil {
+			l.Error("Error deleting previous refresh token for user",
+				zap.Error(err),
+			)
+			return nil, err
+		}
+	}
+
 	// No need to use a repository for idToken as it is unrelated to any data source
 	idToken, err := generateIDToken(u, t.PrivateKey, t.IDExpirationSecs)
 	if err != nil {
@@ -76,15 +87,6 @@ func (t tokenService) NewPairFromUser(ctx context.Context, u *domain.User, prevT
 		return nil, apperrors.NewInternal()
 	}
 
-	// delete user's current refresh token (used when refreshing idToken)
-	if prevTokenID != "" {
-		if err = t.TokenRepository.DeleteRefreshToken(ctx, u.UID.String(), prevTokenID); err != nil {
-			l.Error("Error deleting previous refresh token for user",
-				zap.Error(err),
-			)
-		}
-	}
-
 	return &domain.TokenPair{
 		IDToken:      domain.IDToken{SS: idToken},
 		RefreshToken: domain.RefreshToken{SS: refreshToken.SS, ID: refreshToken.ID, UID: u.UID},
@@ -105,4 +107,37 @@ func (t tokenService) ValidateIDToken(tokenString string) (*domain.User, error) 
 	}
 
 	return claims.User, nil
+}
+
+// ValidateRefreshToken checks to make sure the JWT provided by a string is valid
+// and returns a RefreshToken if valid
+func (t tokenService) ValidateRefreshToken(tokenString string) (*domain.RefreshToken, error) {
+	l := logger.Get()
+
+	// validate actual JWT with string a secret
+	claims, err := validateRefreshToken(tokenString, t.RefreshSecret)
+	if err != nil {
+		l.Error("Error validating Refresh Token",
+			zap.String("tokenString", tokenString),
+			zap.Error(err),
+		)
+		return nil, apperrors.NewAuthorization("Unable to verify user from refresh token")
+	}
+
+	// Registered claims store ID as a string
+	// parse claims.ID as a uuid
+	tokenUUID, err := uuid.Parse(claims.ID)
+	if err != nil {
+		l.Error("Error parsing token UUID",
+			zap.String("tokenUUID", claims.ID),
+			zap.Error(err),
+		)
+		return nil, apperrors.NewAuthorization("Unable to verify user from refresh token")
+	}
+
+	return &domain.RefreshToken{
+		ID:  tokenUUID,
+		UID: claims.UID,
+		SS:  tokenString,
+	}, nil
 }

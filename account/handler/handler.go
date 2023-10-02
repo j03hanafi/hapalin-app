@@ -47,7 +47,7 @@ func NewHandler(c *Config) {
 	g.POST("/signup", h.SignUp)
 	g.POST("/signin", h.SignIn)
 	g.GET("/signout", h.SignOut)
-	g.GET("/tokens", h.Tokens)
+	g.POST("/tokens", h.Tokens)
 	g.GET("/image", h.Image)
 	g.GET("/deleteimage", h.DeleteImage)
 	g.GET("/details", h.Details)
@@ -57,13 +57,6 @@ func NewHandler(c *Config) {
 func (h Handler) SignOut(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"hello": "it's sign out",
-	})
-}
-
-// Tokens handler
-func (h Handler) Tokens(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's tokens",
 	})
 }
 
