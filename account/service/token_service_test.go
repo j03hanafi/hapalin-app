@@ -308,3 +308,43 @@ func TestValidateRefreshToken(t *testing.T) {
 		assert.EqualError(t, err, expectedError.Message)
 	})
 }
+
+func TestSignOut(t *testing.T) {
+	t.Parallel()
+
+	mockTokenRepository := new(mocks.MockTokenRepository)
+	tokenServ := NewTokenService(&TSConfig{
+		TokenRepository: mockTokenRepository,
+	})
+
+	t.Run("no error", func(t *testing.T) {
+		t.Parallel()
+
+		uid, _ := uuid.NewRandom()
+
+		mockTokenRepository.
+			On("DeleteUserRefreshTokens", mock.AnythingOfType("context.backgroundCtx"), uid.String()).
+			Return(nil)
+
+		ctx := context.Background()
+		err := tokenServ.SignOut(ctx, uid)
+		assert.NoError(t, err)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		t.Parallel()
+
+		uidError, _ := uuid.NewRandom()
+		mockTokenRepository.
+			On("DeleteUserRefreshTokens", mock.AnythingOfType("context.backgroundCtx"), uidError.String()).
+			Return(apperrors.NewInternal())
+
+		ctx := context.Background()
+		err := tokenServ.SignOut(ctx, uidError)
+		assert.Error(t, err)
+
+		apperr, ok := err.(*apperrors.Error)
+		assert.True(t, ok)
+		assert.Equal(t, apperrors.Internal, apperr.Type)
+	})
+}

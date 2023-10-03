@@ -32,6 +32,7 @@ type TokenService interface {
 	NewPairFromUser(ctx context.Context, u *User, prevTokenID string) (*TokenPair, error)
 	ValidateIDToken(tokenString string) (*User, error)
 	ValidateRefreshToken(refreshTokenString string) (*RefreshToken, error)
+	SignOut(ctx context.Context, uid uuid.UUID) error
 }
 
 // TokenRepository defines methods it expects a repository
@@ -39,4 +40,5 @@ type TokenService interface {
 type TokenRepository interface {
 	SetRefreshToken(ctx context.Context, userID, tokenID string, expiresIn time.Duration) error
 	DeleteRefreshToken(ctx context.Context, userID, prevTokenID string) error
+	DeleteUserRefreshTokens(ctx context.Context, userID string) error
 }

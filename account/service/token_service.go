@@ -141,3 +141,8 @@ func (t tokenService) ValidateRefreshToken(tokenString string) (*domain.RefreshT
 		SS:  tokenString,
 	}, nil
 }
+
+// SignOut signs out a user by deleting all refresh tokens associated with a user
+func (t tokenService) SignOut(ctx context.Context, uid uuid.UUID) error {
+	return t.TokenRepository.DeleteUserRefreshTokens(ctx, uid.String())
+}
