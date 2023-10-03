@@ -90,3 +90,13 @@ func (s userService) SignIn(ctx context.Context, u *domain.User) error {
 	*u = *uFetched
 	return nil
 }
+
+func (s userService) UpdateDetails(ctx context.Context, u *domain.User) error {
+	// Update user details in repository
+	err := s.UserRepository.Update(ctx, u)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

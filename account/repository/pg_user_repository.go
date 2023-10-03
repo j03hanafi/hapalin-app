@@ -76,3 +76,32 @@ func (r pgUserRepository) FindByEmail(ctx context.Context, email string) (*domai
 
 	return user, nil
 }
+
+func (r pgUserRepository) Update(ctx context.Context, u *domain.User) error {
+	l := logger.Get()
+
+	query := `
+		UPDATE users
+		SET name = :name, email = :email, website = :website
+		WHERE uid = :uid
+		RETURNING *;
+	`
+
+	nstmt, err := r.DB.PrepareNamedContext(ctx, query)
+	if err != nil {
+		l.Error("Unable to prepare user update query",
+			zap.Error(err),
+		)
+		return apperrors.NewInternal()
+	}
+
+	if err = nstmt.GetContext(ctx, u, u); err != nil {
+		l.Error("Unable to update user",
+			zap.Any("uid", u),
+			zap.Error(err),
+		)
+		return apperrors.NewInternal()
+	}
+
+	return nil
+}
