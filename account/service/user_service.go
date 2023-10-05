@@ -12,21 +12,24 @@ import (
 // userService acts as a struct for injecting an implementation of UserRepository
 // for use in service methods
 type userService struct {
-	UserRepository domain.UserRepository
+	UserRepository  domain.UserRepository
+	ImageRepository domain.ImageRepository
 }
 
 // USConfig will hold repositories that will eventually be injected into this
 //
 //	service layer
 type USConfig struct {
-	UserRepository domain.UserRepository
+	UserRepository  domain.UserRepository
+	ImageRepository domain.ImageRepository
 }
 
 // NewUserService is a factory function for
 // initializing a userService with its repository layer dependencies
 func NewUserService(c *USConfig) domain.UserService {
 	return &userService{
-		UserRepository: c.UserRepository,
+		UserRepository:  c.UserRepository,
+		ImageRepository: c.ImageRepository,
 	}
 }
 
