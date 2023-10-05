@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"github.com/google/uuid"
+	"mime/multipart"
 )
 
 // User defines domain model and its json and db representations
@@ -22,6 +23,7 @@ type UserService interface {
 	SignUp(ctx context.Context, u *User) error
 	SignIn(ctx context.Context, u *User) error
 	UpdateDetails(ctx context.Context, u *User) error
+	SetProfileImage(ctx context.Context, uid uuid.UUID, imageFileHeader *multipart.FileHeader) (*User, error)
 }
 
 // UserRepository defines methods the service layer expects
@@ -31,4 +33,5 @@ type UserRepository interface {
 	FindByID(ctx context.Context, uid uuid.UUID) (*User, error)
 	Create(ctx context.Context, u *User) error
 	Update(ctx context.Context, u *User) error
+	UpdateImage(ctx context.Context, uid uuid.UUID, imageURL string) (*User, error)
 }

@@ -105,3 +105,26 @@ func (r pgUserRepository) Update(ctx context.Context, u *domain.User) error {
 
 	return nil
 }
+
+func (r pgUserRepository) UpdateImage(ctx context.Context, uid uuid.UUID, imageURL string) (*domain.User, error) {
+	l := logger.Get()
+
+	user := &domain.User{}
+
+	query := `
+		UPDATE users
+		SET image_url = $1
+		WHERE uid = $2
+		RETURNING *;
+	`
+
+	if err := r.DB.GetContext(ctx, user, query, imageURL, uid); err != nil {
+		l.Error("Unable to update user image",
+			zap.Any("uid", uid),
+			zap.Error(err),
+		)
+		return user, apperrors.NewInternal()
+	}
+
+	return user, nil
+}

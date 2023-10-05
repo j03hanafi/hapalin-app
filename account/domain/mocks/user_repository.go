@@ -67,3 +67,20 @@ func (m *MockUserRepository) Update(ctx context.Context, u *domain.User) error {
 
 	return r0
 }
+
+func (m *MockUserRepository) UpdateImage(ctx context.Context, uid uuid.UUID, imageURL string) (*domain.User, error) {
+	ret := m.Called(ctx, uid, imageURL)
+
+	var r0 *domain.User
+	if ret.Get(0) != nil {
+		r0 = ret.Get(0).(*domain.User)
+	}
+
+	var r1 error
+	if ret.Get(1) != nil {
+		r1 = ret.Get(1).(error)
+	}
+
+	return r0, r1
+
+}
