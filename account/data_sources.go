@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"github.com/j03hanafi/hapalin-app/account/logger"
@@ -9,11 +10,13 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"os"
+	"time"
 )
 
 type dataSources struct {
-	DB          *sqlx.DB
-	RedisClient *redis.Client
+	DB            *sqlx.DB
+	RedisClient   *redis.Client
+	StorageClient *storage.Client
 }
 
 // InitDS establishes connections to fields in dataSources
@@ -73,9 +76,24 @@ func initDS() (*dataSources, error) {
 		return nil, err
 	}
 
+	// Initialize Google Cloud Storage connection
+	l.Info("Connecting to Google Cloud Storage...")
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	storageClient, err := storage.NewClient(ctx)
+	if err != nil {
+		l.Error("Error connecting to Google Cloud Storage",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
 	return &dataSources{
-		DB:          db,
-		RedisClient: rdb,
+		DB:            db,
+		RedisClient:   rdb,
+		StorageClient: storageClient,
 	}, nil
 }
 
@@ -95,5 +113,13 @@ func (ds *dataSources) close() error {
 		)
 		return err
 	}
+
+	if err := ds.StorageClient.Close(); err != nil {
+		l.Error("Error closing Google Cloud Storage connection",
+			zap.Error(err),
+		)
+		return err
+	}
+
 	return nil
 }
