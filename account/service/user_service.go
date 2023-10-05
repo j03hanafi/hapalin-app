@@ -7,6 +7,9 @@ import (
 	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
 	"github.com/j03hanafi/hapalin-app/account/logger"
 	"go.uber.org/zap"
+	"mime/multipart"
+	"net/url"
+	"path"
 )
 
 // userService acts as a struct for injecting an implementation of UserRepository
@@ -102,4 +105,77 @@ func (s userService) UpdateDetails(ctx context.Context, u *domain.User) error {
 	}
 
 	return nil
+}
+
+func (s userService) SetProfileImage(ctx context.Context, uid uuid.UUID, imageFileHeader *multipart.FileHeader) (*domain.User, error) {
+	l := logger.Get()
+
+	user, err := s.UserRepository.FindByID(ctx, uid)
+
+	if err != nil {
+		return nil, err
+	}
+
+	objName, err := objNameFromURL(user.ImageURL)
+
+	if err != nil {
+		return nil, err
+	}
+
+	imageFile, err := imageFileHeader.Open()
+
+	if err != nil {
+		l.Error("Failed to open image file",
+			zap.Error(err),
+		)
+		return nil, apperrors.NewInternal()
+	}
+
+	// upload user's image to ImageRepository
+	// Possibly received updated imageURL
+	imageURL, err := s.ImageRepository.UpdateProfile(ctx, objName, imageFile)
+
+	if err != nil {
+		l.Error("Failed to upload image to cloud storage",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	updatedUser, err := s.UserRepository.UpdateImage(ctx, uid, imageURL)
+
+	if err != nil {
+		l.Error("Failed to update user profile image URL",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
+	return updatedUser, nil
+
+}
+
+func objNameFromURL(imageURL string) (string, error) {
+	l := logger.Get()
+
+	// if user doesn't have a profile image, create one
+	// otherwise, extract last part of URL to get cloud storage object name
+	if imageURL == "" {
+		objID, _ := uuid.NewRandom()
+		return objID.String(), nil
+	}
+
+	// split off last part of URL, which is the image's storage object ID
+	urlPath, err := url.Parse(imageURL)
+
+	if err != nil {
+		l.Error("Failed to parse image URL",
+			zap.Error(err),
+		)
+		return "", apperrors.NewInternal()
+	}
+
+	// get "path" of URL, which is everything after the domain name
+	// then get "base", which is the last part of the path
+	return path.Base(urlPath.Path), nil
 }
