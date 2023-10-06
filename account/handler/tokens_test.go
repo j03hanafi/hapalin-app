@@ -19,7 +19,6 @@ import (
 )
 
 func TestTokens(t *testing.T) {
-	t.Parallel()
 	gin.SetMode(gin.TestMode)
 	l := logger.Get()
 
