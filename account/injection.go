@@ -111,6 +111,16 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		return nil, err
 	}
 
+	// read MAX_BODY_BYTES
+	maxBodyBytes := os.Getenv("MAX_BODY_BYTES")
+	mbb, err := strconv.ParseInt(maxBodyBytes, 0, 64)
+	if err != nil {
+		l.Error("failed to parse max body bytes",
+			zap.Error(err),
+		)
+		return nil, err
+	}
+
 	// initialize gin.Engine
 	router := gin.New()
 	router.Use(ginzap.Ginzap(l, time.RFC3339, false))
@@ -122,6 +132,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		TokenService:    tokenService,
 		BaseURL:         os.Getenv("ACCOUNT_API_URL"),
 		TimeoutDuration: time.Duration(ht) * time.Second,
+		MaxBodyBytes:    mbb,
 	})
 
 	return router, nil
