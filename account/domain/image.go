@@ -9,4 +9,5 @@ import (
 // it interacts with to implement
 type ImageRepository interface {
 	UpdateProfile(ctx context.Context, objName string, imageFile multipart.File) (string, error)
+	DeleteProfile(ctx context.Context, objName string) error
 }

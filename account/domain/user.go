@@ -24,6 +24,7 @@ type UserService interface {
 	SignIn(ctx context.Context, u *User) error
 	UpdateDetails(ctx context.Context, u *User) error
 	SetProfileImage(ctx context.Context, uid uuid.UUID, imageFileHeader *multipart.FileHeader) (*User, error)
+	ClearProfileImage(ctx context.Context, uid uuid.UUID) error
 }
 
 // UserRepository defines methods the service layer expects

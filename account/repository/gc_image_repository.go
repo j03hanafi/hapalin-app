@@ -57,3 +57,20 @@ func (r gcImageRepository) UpdateProfile(ctx context.Context, objName string, im
 
 	return imageURL, nil
 }
+
+func (r gcImageRepository) DeleteProfile(ctx context.Context, objName string) error {
+	l := logger.Get()
+
+	bucket := r.Storage.Bucket(r.BucketName)
+
+	object := bucket.Object(objName)
+
+	if err := object.Delete(ctx); err != nil {
+		l.Error("Unable to delete file from Google Cloud Storage",
+			zap.Error(err),
+		)
+		return apperrors.NewInternal()
+	}
+
+	return nil
+}

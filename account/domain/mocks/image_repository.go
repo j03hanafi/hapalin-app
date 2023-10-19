@@ -27,3 +27,15 @@ func (m *MockImageRepository) UpdateProfile(ctx context.Context, objName string,
 
 	return r0, r1
 }
+
+func (m *MockImageRepository) DeleteProfile(ctx context.Context, objName string) error {
+	args := m.Called(ctx, objName)
+
+	var r0 error
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(error)
+	}
+
+	return r0
+
+}

@@ -5,7 +5,6 @@ import (
 	"github.com/j03hanafi/hapalin-app/account/domain"
 	"github.com/j03hanafi/hapalin-app/account/domain/apperrors"
 	"github.com/j03hanafi/hapalin-app/account/handler/middleware"
-	"net/http"
 	"time"
 )
 
@@ -46,22 +45,17 @@ func NewHandler(c *Config) {
 		g.POST("/signout", middleware.AuthUser(h.TokenService), h.SignOut)
 		g.PUT("/details", middleware.AuthUser(h.TokenService), h.Details)
 		g.POST("/image", middleware.AuthUser(h.TokenService), h.Image)
+		g.DELETE("/deleteimage", middleware.AuthUser(h.TokenService), h.DeleteImage)
 	} else {
 		g.GET("/me", h.Me)
 		g.POST("/signout", h.SignOut)
 		g.PUT("/details", h.Details)
 		g.POST("/image", h.Image)
+		g.DELETE("/deleteimage", h.DeleteImage)
 	}
 
 	g.POST("/signup", h.SignUp)
 	g.POST("/signin", h.SignIn)
 	g.POST("/tokens", h.Tokens)
-	g.GET("/deleteimage", h.DeleteImage)
-}
 
-// DeleteImage handler
-func (h Handler) DeleteImage(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hello": "it's delete image",
-	})
 }
